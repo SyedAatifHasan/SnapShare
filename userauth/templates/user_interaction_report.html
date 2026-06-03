@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="container py-5">
+
+  <h3 class="mb-4">📊 Interaction Report — @{{ viewed_user.username }}</h3>
+
+  <h5 class="fw-bold">❤️ Posts you liked</h5>
+  <div class="row row-cols-3 g-3 mb-4">
+    {% for like in liked_posts %}
+    <div class="col">
+      <a href="/post_details/{{ like.post.id }}">
+        {% if like.post.first_active_image %}
+          {% if like.post.first_active_image.image %}
+            <img src="{{ like.post.first_active_image.image.url }}" class="img-fluid rounded">
+          {% elif like.post.first_active_image.video %}
+            <video class="img-fluid rounded" controls>
+              <source src="{{ like.post.first_active_image.video.url }}">
+            </video>
+          {% endif %}
+        {% else %}
+          <p class="small text-center">Text Post: "{{ like.post.text_content|truncatechars:30 }}"</p>
+        {% endif %}
+      </a>
+    </div>
+    {% empty %}
+    <p>No liked posts</p>
+    {% endfor %}
+  </div>
+
+  <h5 class="fw-bold">💬 Posts you commented on</h5>
+  <div class="row row-cols-3 g-3 mb-4">
+    {% for comment in commented_posts %}
+    <div class="col">
+      <a href="/post_details/{{ comment.post.id }}">
+        {% if comment.post.first_active_image %}
+          {% if comment.post.first_active_image.image %}
+            <img src="{{ comment.post.first_active_image.image.url }}" class="img-fluid rounded">
+          {% elif comment.post.first_active_image.video %}
+            <video class="img-fluid rounded" controls>
+              <source src="{{ comment.post.first_active_image.video.url }}">
+            </video>
+          {% endif %}
+        {% else %}
+          <p class="small text-center">Text Post: "{{ comment.post.text_content|truncatechars:30 }}"</p>
+        {% endif %}
+      </a>
+    </div>
+    {% empty %}
+    <p>No comments</p>
+    {% endfor %}
+  </div>
+
+  <h5 class="fw-bold">🔁 Posts you reposted</h5>
+  <div class="row row-cols-3 g-3 mb-4">
+    {% for repost in reposted_posts %}
+    <div class="col">
+      <a href="/post_details/{{ repost.original_post.id }}">
+        {% if repost.original_post.first_active_image %}
+          {% if repost.original_post.first_active_image.image %}
+            <img src="{{ repost.original_post.first_active_image.image.url }}" class="img-fluid rounded">
+          {% elif repost.original_post.first_active_image.video %}
+            <video class="img-fluid rounded" controls>
+              <source src="{{ repost.original_post.first_active_image.video.url }}">
+            </video>
+          {% endif %}
+        {% else %}
+          <p class="small text-center">Text Post: "{{ repost.original_post.text_content|truncatechars:30 }}"</p>
+        {% endif %}
+      </a>
+    </div>
+    {% empty %}
+    <p>No reposts</p>
+    {% endfor %}
+  </div>
+
+</main>
+{% endblock %}

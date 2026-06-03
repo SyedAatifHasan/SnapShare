@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card mb-4">
+        <div class="d-flex p-3 align-items-center">
+          <img src="{{ viewed_profile.profileimg.url }}" class="rounded-circle me-3" width="100">
+          <div>
+            <h4>{{ viewed_profile.user.first_name }}</h4>
+            <h6>@{{ viewed_profile.user.username }}</h6>
+            <i class="fa-solid fa-location-dot"></i> {{ viewed_profile.location }}<br>
+            <p>{{ viewed_profile.bio }}</p>
+            <div class="mt-2">
+              {% if viewed_profile.insta %}
+              <a href="{{ viewed_profile.insta }}" target="_blank"><i class="fa-brands fa-instagram me-2"></i></a>
+              {% endif %}
+              {% if viewed_profile.fb %}
+              <a href="{{ viewed_profile.fb }}" target="_blank"><i class="fa-brands fa-facebook me-2"></i></a>
+              {% endif %}
+              {% if viewed_profile.linkedin %}
+              <a href="{{ viewed_profile.linkedin }}" target="_blank"><i class="fa-brands fa-linkedin me-2"></i></a>
+              {% endif %}
+              {% if viewed_profile.twitter %}
+              <a href="{{ viewed_profile.twitter }}" target="_blank"><i class="fa-brands fa-twitter me-2"></i></a>
+              {% endif %}
+            </div>
+
+            {% if user == viewed_profile.user %}
+
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item btn btn-secondary mb-2"><a href="/edit_profile"
+                    class="btn-sm text-decoration-none text"><i class="fa-solid fa-user-edit me-2"></i>Edit Profile</a>
+                </li>
+                <li class="dropdown-item btn btn-secondary"><a href="/updatepassword/"
+                    class="btn-sm text-decoration-none text"><i class="fa-solid fa-key me-2"></i>Update Password</a>
+                </li>
+              </ul>
+            </div>
+            {% else %}
+            <form action="/follow/" method="POST" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" value="{{ user.username }}" name="follower" />
+              <input type="hidden" value="{{ user_object.username }}" name="user" />
+              <button type="submit" class="btn btn-outline-primary btn-sm">{{ follow_unfollow }}</button>
+            </form>
+            {% if relation == "mutual" %}
+            <span class="badge bg-success">Mutual Follow</span>
+            {% elif relation == "follows_you" %}
+            <span class="badge bg-info">Follows You</span>
+            {% elif relation == "you_follow" %}
+            <span class="badge bg-secondary">You Follow</span>
+            {% else %}
+            <span class="badge bg-light text-dark">Not Following</span>
+            {% endif %}
+            {% endif %}
+
+
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-around border-top p-2">
+          <div class="text-center">
+            <p class="mb-0">{{ post_count }}</p>
+            <small>Posts</small>
+          </div>
+          <div class="text-center" style="pointer-events: auto; cursor: pointer;">
+            <p class="mb-0" data-bs-toggle="modal" data-bs-target="#followersModal">{{ user_followers }}<br>
+              <small>Followers</small>
+            </p>
+          </div>
+          <div class="text-center" style="pointer-events: auto; cursor: pointer;">
+            <p class="mb-0" data-bs-toggle="modal" data-bs-target="#followingModal">{{ user_following }}<br>
+              <small>Following</small>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item ">
+          <a class="nav-link {% if tab == 'posts' %}active{% endif %}" href="?tab=posts">All</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if tab == 'images' %}active{% endif %}" href="?tab=images">Images</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if tab == 'videos' %}active{% endif %}" href="?tab=videos">Videos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if tab == 'reposts' %}active{% endif %}" href="?tab=reposts">Reposts</a>
+        </li>
+      </ul>
+
+      <div class="row row-cols-1 row-cols-md-3 g-3">
+
+        {% if tab == 'posts' %}
+        {% for post in posts %}
+        <div class="col">
+          <div class="card h-100">
+
+            <a href="/post_details/{{ post.id }}" class="text-decoration-none text-dark">
+
+              {% if post.first_active_image %}
+              <img src="{{ post.first_active_image.image.url }}" class="card-img-top mb-1">
+              {% elif post.image %}
+              <img src="{{ post.image.url }}" class="card-img-top">
+              {% elif post.video %}
+              <video class="card-img-top" controls>
+                <source src="{{ post.video.url }}">
+              </video>
+              {% else %}
+              <div class="p-3 text">
+                {{ post.text_content|default:post.text_content|truncatechars:100 }}
+              </div>
+              {% endif %}
+
+
+            </a>
+
+            {% if user == viewed_profile.user %}
+            <div class="card-body text-end">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="dropdown">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                  <li>
+                    <a href="/update/{{ post.id }}" class="dropdown-item d-flex align-items-center text-primary">
+                      <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>
+                      Edit
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="/delete/{{ post.id }}" class="dropdown-item d-flex align-items-center text-danger">
+                      <i class="fa-solid fa-trash me-2"></i>
+                      Delete
+                    </a>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-footer">No posts found.</p>
+        {% endfor %}
+        {% endif %}
+        {% if tab == 'images' %}
+        {% for post in posts %}
+        {% if post.image or post.images.exists %}
+        <div class="col">
+          <div class="card h-100">
+
+            <a href="/post_details/{{ post.id }}" class="text-decoration-none text-dark">
+
+              {% if post.first_active_image %}
+              <img src="{{ post.first_active_image.image.url }}" class="card-img-top mb-1">
+              {% elif post.image %}
+              <img src="{{ post.image.url }}" class="card-img-top">
+              {% endif %}
+            </a>
+            {% if user == viewed_profile.user %}
+            <div class="card-body text-end">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="dropdown">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                  <li>
+                    <a href="/update/{{ post.id }}" class="dropdown-item d-flex align-items-center text-primary">
+                      <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>
+                      Edit
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="/delete/{{ post.id }}" class="dropdown-item d-flex align-items-center text-danger">
+                      <i class="fa-solid fa-trash me-2"></i>
+                      Delete
+                    </a>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p class="text-footer">No images found.</p>
+        {% endfor %}
+        {% endif %}
+        {% if tab == 'videos' %}
+        {% for post in posts %}
+        {% if post.video or post.videos.exists %}
+        <div class="col">
+          <div class="card h-100">
+            <a href="/post_details/{{ post.id }}" class="text-decoration-none">
+              {% if post.video %}
+              <video class="card-img-top" controls>
+                <source src="{{ post.video.url }}">
+              </video></a>
+            {% endif %}
+            {% if user == viewed_profile.user %}
+            <div class="card-body text-end">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="dropdown">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                  <li>
+                    <a href="/update/{{ post.id }}" class="dropdown-item d-flex align-items-center text-primary">
+                      <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>
+                      Edit
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="/delete/{{ post.id }}" class="dropdown-item d-flex align-items-center text-danger">
+                      <i class="fa-solid fa-trash me-2"></i>
+                      Delete
+                    </a>
+                  </li>
+
+                </ul>
+
+              </div>
+            </div>
+            {% endif %}
+            </a>
+          </div>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p class="text-footer">No videos found.</p>
+        {% endfor %}
+        {% endif %}
+        {% if tab == 'reposts' %}
+        {% for repost in reposts %}
+        <div class="col">
+          <div class="card h-100">
+            <a href="/post_details/{{ repost.original_post.id }}" class="text-decoration-none">
+
+              {% if repost.original_post.first_active_image %}
+              <img src="{{ repost.original_post.first_active_image.image.url }}" class="card-img-top mb-1">
+              {% elif repost.original_post.image %}
+              <img src="{{ repost.original_post.image.url }}" class="card-img-top">
+              {% elif repost.original_post.video %}
+              <video class="card-img-top" controls>
+                <source src="{{ repost.original_post.video.url }}">
+              </video>
+              {% else %}
+              <div class="p-3 text">
+                {{ repost.original_post.text_content|truncatechars:100 }}
+              </div>
+              {% endif %}
+
+            </a>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-footer">No reposts found.</p>
+        {% endfor %}
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</div>
+<div class="modal fade" id="followersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Followers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" style="background-color: #999;"></button>
+      </div>
+      <div class="modal-body">
+        {% for f in followers %}
+        <div class="d-flex align-items-center mb-2">
+          <a href="/profile/{{ f.username }}">
+            <img src="{{ f.profile.profileimg.url }}" class="rounded-circle me-2" width="40" height="40">
+          </a>
+          <div>
+            <a href="/profile/{{ f.username }}" class="fw-bold text text-decoration-none">
+              {{ f.username }}
+            </a>
+          </div>
+          {% if user == viewed_profile.user %}
+          <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#userActionModal{{ f.id }}"
+            style="margin-left:10px; background-color: #999;">
+            view Report
+          </button>
+          {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-footer">No followers yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="followingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Following</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" style="background-color: #999;"></button>
+      </div>
+      <div class="modal-body">
+        {% for fo in following_users %}
+        <div class="d-flex align-items-center mb-2">
+          <a href="/profile/{{ fo.user.username }}">
+            <img src="{{ fo.user.profile.profileimg.url }}" class="rounded-circle me-2" width="40" height="40">
+          </a>
+          <div>
+            <a href="/profile/{{ fo.user.username }}" class="fw-bold text text-decoration-none">{{ fo.user.username }}
+            </a>
+          </div>
+          {% if user == viewed_profile.user %}
+         <a href="/profile/{{ fo.user.username }}/report/" class="btn btn-sm btn-light" style="margin-left:10px; background-color: #999;">
+             View Report
+</a>
+
+          {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-footer">Not following anyone yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% for f in followers %}
+<div class="modal fade" id="userActionModal{{ f.id }}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">@{{ f.username }}</h5>
+        <button class="btn-close" style="background-color: #999;" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="list-group mb-3">
+          <p class="list-group-item list-group-item-action">
+            📊 View Interaction Report
+          </p>
+        </div>
+
+        <h6 class="fw-bold">❤️ Posts that {{ f.username }} liked</h6>
+        <div class="row row-cols-3 g-2 mb-3">
+          {% for like in f.liked_posts_by_request_user %}
+          <div class="col">
+            <a href="/post_details/{{ like.post.id }}" class="text_decoration-none">
+              {% if like.post.first_active_image %}
+              {% if like.post.first_active_image.image %}
+              <img src="{{ like.post.first_active_image.image.url }}" class="img-fluid rounded">
+              {% elif like.post.first_active_image.video %}
+              <video class="img-fluid rounded" controls>
+                <source src="{{ like.post.first_active_image.video.url }}">
+              </video>
+              {% endif %}
+              {% else %}
+              <p class="small text text-decoration-none text-center">
+                Text Post: "{{ like.post.text_content|truncatechars:30 }}"</p>
+              {% endif %}
+            </a>
+          </div>
+          {% empty %}
+          <p class="text-footer small">No liked posts</p>
+          {% endfor %}
+        </div>
+
+        <hr>
+
+        <h6 class="fw-bold">💬 Posts {{ f.username }} commented on</h6>
+        <div class="row row-cols-3 g-2 mb-3">
+          {% for comment in f.commented_posts_by_request_user %}
+          <div class="col">
+            <a href="/post_details/{{ comment.post.id }}" class="text_decoration-none">
+              {% if comment.post.first_active_image %}
+              {% if comment.post.first_active_image.image %}
+              <img src="{{ comment.post.first_active_image.image.url }}" class="img-fluid rounded">
+              {% elif comment.post.first_active_image.video %}
+              <video class="img-fluid rounded" controls>
+                <source src="{{ comment.post.first_active_image.video.url }}">
+              </video>
+              {% endif %}
+              {% else %}
+              <p class="small text text-decoration-none text-center">
+                Text Post: "{{ comment.post.text_content|truncatechars:30 }}"</p>
+              {% endif %}
+            </a>
+          </div>
+          {% empty %}
+          <p class="text-footer small">No comments</p>
+          {% endfor %}
+        </div>
+
+        <hr>
+
+        <h6 class="fw-bold">🔁 Reposts ({{ f.reposted_posts_by_request_user|length }})</h6>
+        <div class="row row-cols-3 g-2">
+          {% for repost in f.reposted_posts_by_request_user %}
+          <div class="col">
+            <a href="/post_details/{{ repost.original_post.id }}" class="text_decoration-none">
+              {% if repost.original_post.first_active_image %}
+              {% if repost.original_post.first_active_image.image %}
+              <img src="{{ repost.original_post.first_active_image.image.url }}" class="img-fluid rounded">
+              {% elif repost.original_post.first_active_image.video %}
+              <video class="img-fluid rounded" controls>
+                <source src="{{ repost.original_post.first_active_image.video.url }}">
+              </video>
+              {% endif %}
+              {% else %}
+              <p class="small text text-decoration-none text-center">Text Post: "{{ repost.original_post.text_content|truncatechars:30 }}"</p>
+              {% endif %}
+            </a>
+          </div>
+          {% empty %}
+          <p class="text-footer small">No reposts</p>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

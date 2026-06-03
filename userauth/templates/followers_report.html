@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="container py-5">
+
+  <h3 class="mb-4">📊 Followers Interaction Report — @{{ viewed_user.username }}</h3>
+
+  {% for f in followers %}
+  <div class="card mb-4 p-3 shadow-sm">
+    <div class="d-flex align-items-center mb-3">
+      <img src="{{ f.user.profile.profileimg.url }}" class="rounded-circle me-3" width="60">
+      <h5 class="mb-0">@{{ f.user.username }}</h5>
+    </div>
+
+    <h6 class="fw-bold">❤️ Posts of {{ f.user.username }} that you liked</h6>
+    <div class="row row-cols-3 g-2 mb-3">
+      {% for like in f.liked_posts %}
+      <div class="col">
+        <a href="/post_details/{{ like.post.id }}">
+          {% if like.post.first_active_image %}
+            {% if like.post.first_active_image.image %}
+              <img src="{{ like.post.first_active_image.image.url }}" class="img-fluid rounded">
+            {% elif like.post.first_active_image.video %}
+              <video class="img-fluid rounded" controls>
+                <source src="{{ like.post.first_active_image.video.url }}">
+              </video>
+            {% endif %}
+          {% else %}
+            <p class="small text-center">
+              Text Post: "{{ like.post.text_content|truncatechars:30 }}"
+            </p>
+          {% endif %}
+        </a>
+      </div>
+      {% empty %}
+      <p class="small text-footer">No liked posts</p>
+      {% endfor %}
+    </div>
+
+    <h6 class="fw-bold">💬 Posts of {{ f.user.username }} that you commented on</h6>
+    <div class="row row-cols-3 g-2 mb-3">
+      {% for comment in f.commented_posts %}
+      <div class="col">
+        <a href="/post_details/{{ comment.post.id }}">
+          {% if comment.post.first_active_image %}
+            {% if comment.post.first_active_image.image %}
+              <img src="{{ comment.post.first_active_image.image.url }}" class="img-fluid rounded">
+            {% elif comment.post.first_active_image.video %}
+              <video class="img-fluid rounded" controls>
+                <source src="{{ comment.post.first_active_image.video.url }}">
+              </video>
+            {% endif %}
+          {% else %}
+            <p class="small text-center">
+              Text Post: "{{ comment.post.text_content|truncatechars:30 }}"
+            </p>
+          {% endif %}
+        </a>
+      </div>
+      {% empty %}
+      <p class="small text-footer">No comments</p>
+      {% endfor %}
+    </div>
+
+    <h6 class="fw-bold">🔁 Posts of {{ f.user.username }} that you reposted ({{ f.reposted_posts|length }})</h6>
+    <div class="row row-cols-3 g-2 mb-2">
+      {% for repost in f.reposted_posts %}
+      <div class="col">
+        <a href="/post_details/{{ repost.original_post.id }}">
+          {% if repost.original_post.first_active_image %}
+            {% if repost.original_post.first_active_image.image %}
+              <img src="{{ repost.original_post.first_active_image.image.url }}" class="img-fluid rounded">
+            {% elif repost.original_post.first_active_image.video %}
+              <video class="img-fluid rounded" controls>
+                <source src="{{ repost.original_post.first_active_image.video.url }}">
+              </video>
+            {% endif %}
+          {% else %}
+            <p class="small text-center">
+              Text Post: "{{ repost.original_post.text_content|truncatechars:30 }}"
+            </p>
+          {% endif %}
+        </a>
+      </div>
+      {% empty %}
+      <p class="small text-footer">No reposts</p>
+      {% endfor %}
+    </div>
+
+  </div>
+  {% empty %}
+  <p>No followers yet.</p>
+  {% endfor %}
+
+</main>
+{% endblock %}

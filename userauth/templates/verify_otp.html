@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Verify OTP</h3>
+                <form method="POST" action="{% url 'verify_otp' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">OTP</label>
+                        <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Verify OTP</button>
+
+                    </div>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p class="text-center mt-3">
+                        Didn't receive OTP?
+                        <a href="{% url 'resend_otp' %}" id="resendLink" class="btn btn-link">
+                            Resend OTP
+                        </a>
+                        <span id="timerText" style="color: gray;"></span>
+                    </p>
+
+                    <script>
+                        let timeLeft = {{ time_left|default:0 }};
+
+                        const resend = document.getElementById("resendLink");
+                        const timerText = document.getElementById("timerText");
+
+                        function formatTime(seconds) {
+                            const m = Math.floor(seconds / 60);
+                            const s = seconds % 60;
+                            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                        }
+
+                        function startTimer() {
+                            if (timeLeft > 0) {
+                                resend.classList.add("disabled");
+                                resend.style.pointerEvents = "none";
+                                resend.style.color = "gray";
+
+                                const interval = setInterval(() => {
+                                    timerText.textContent = ` (Wait ${formatTime(timeLeft)})`;
+                                    timeLeft--;
+
+                                    if (timeLeft < 0) {
+                                        clearInterval(interval);
+                                        resend.classList.remove("disabled");
+                                        resend.style.pointerEvents = "auto";
+                                        resend.style.color = "";
+                                        timerText.textContent = "";
+                                    }
+                                }, 1000);
+                            }
+                        }
+                        startTimer();
+                    </script>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

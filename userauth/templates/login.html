@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="text-center mb-4">Login</h3>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="login_input" class="form-control" placeholder="Enter username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password" id="show" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Login</button>
+            <label class="toggle-switch">
+              <input type="checkbox" onclick="myFunction()">
+              <span class="slider"></span>
+              <span class="toggle-text">Show Password</span>
+            </label>
+
+            <script>
+              function myFunction() {
+                var x = document.getElementById("show");
+                if (x.type === "password") {
+                  x.type = "text";
+                } else {
+                  x.type = "password";
+                }
+              } 
+            </script>
+          </div>
+        </form>
+        <p class="mt-3 text-center">
+          Don't have an account? <a href="/register/">Register here</a>.
+        </p>
+        <p class="mt-3 text-center"><a href="/forget_password/">Forgot Password?</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

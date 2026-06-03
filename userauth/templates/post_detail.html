@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="main mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+
+      <div class="card shadow-sm mb-4">
+
+        <div class="card-header d-flex align-items-center">
+          <img src="{{ post.user.profile.profileimg.url }}" class="rounded-circle me-2" width="40" height="40">
+          <a href="/profile/{{ post.user.username }}" class="fw-bold text-decoration-none text">
+            {{ post.user.username }}
+          </a>
+
+          {% if post.post_type == "REPOST" %}
+          <small class="ms-2 text-footer">
+            <i class="fa-solid fa-retweet"></i> reposted from
+            <a href="/profile/{{ post.repost_of.user.username }}">
+              {{ post.repost_of.user.username }}
+            </a>
+          </small>
+          {% endif %}
+        </div>
+        <div class="card-body">
+
+          {% if post.post_type == "REPOST" %}
+          <p class="text-footer mb-1">
+            Reposted from
+            <a href="/profile/{{ post.repost_of.user.username }}">@{{ post.repost_of.user.username }}</a>
+          </p>
+
+          <div class="border rounded p-2 mb-2">
+
+            {% if post.repost_of.caption %}
+            <p>{{ post.repost_of.caption }}</p>
+            {% endif %}
+
+            {% if post.repost_of.text_content %}
+            <p>{{ post.repost_of.text_content }}</p>
+            {% endif %}
+
+            {% if post.repost_of.images.all %}
+            <div id="carousel{{ post.id }}" class="carousel slide mb-2" data-bs-ride="carousel">
+              <div class="carousel-inner">
+                {% for img in post.repost_of.images.all %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                  <img src="{{ img.image.url }}" class="d-block w-100 rounded">
+                </div>
+                {% endfor %}
+              </div>
+              {% if post.repost_of.images.count > 1 %}
+              <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ post.id }}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ post.id }}" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              </button>
+              {% endif %}
+            </div>
+            {% endif %}
+
+            {% if post.repost_of.video %}
+            <video class="w-100 rounded" autoplay loop controls>
+              <source src="{{ post.repost_of.video.url }}">
+            </video>
+            {% endif %}
+          </div>
+
+          {% else %}
+
+          {% if post.caption %}
+          <p>{{ post.caption }}</p>
+          {% endif %}
+
+          {% if post.text_content %}
+          <p>{{ post.text_content }}</p>
+          {% endif %}
+
+          {% if active_images %}
+          <div id="carousel{{ post.id }}" class="carousel slide mb-2" data-bs-ride="carousel">
+            <div class="carousel-inner">
+             {% for img in active_images %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <img src="{{ img.image.url }}" class="d-block w-100 rounded">
+              </div>
+              {% endfor %}
+            </div>
+            {% if post.images.count > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ post.id }}" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: #74b9ff;"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ post.id }}" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: #74b9ff;"></span>
+            </button>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if post.video %}
+          <video class="w-100 rounded" autoplay loop controls>
+            <source src="{{ post.video.url }}">
+          </video>
+          {% endif %}
+
+          {% endif %}
+        </div>
+        <div class="d-flex gap-2 px-3 pb-2">
+          <a href="/like-post?post_id={{ post.id }}"
+             class="btn btn-sm {% if post.liked %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <i class="fa-solid fa-heart"></i> {{ post.no_of_likes }}
+          </a>
+
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#comment{{ post.id }}">
+            <i class="fa-solid fa-comment"></i> {{ comments.count }}
+          </button>
+
+          {% if post.allow_repost and post.post_type != "REPOST" %}
+          <a href="{% url 'repost' post.id %}" 
+             class="btn btn-sm {% if post.reposted_by_user %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <i class="fa-solid fa-retweet"></i> {{ post.no_of_reposts }}
+          </a>
+          {% endif %}
+
+          <button class="btn btn-sm btn-outline-primary"
+                  onclick="sharePost('{{ request.build_absolute_uri }}')">
+            <i class="fa-solid fa-share"></i> Share
+          </button>
+        </div>
+
+        <div id="comment{{ post.id }}" class="collapse px-3 pb-3">
+          <form method="POST" action="{% url 'add-comment' %}">
+            {% csrf_token %}
+            <input type="hidden" name="post_id" value="{{ post.id }}">
+            <input type="text" name="comment" class="form-control form-control-sm"
+                   placeholder="Write a comment..." required>
+            <button class="btn btn-sm btn-primary mt-2">Post</button>
+          </form>
+
+          {% if comments %}
+  {% for comment in comments %}
+  <div class="mt-2 p-2 post-card rounded">
+      <span style="font-weight:bold">
+          <img src="{{ comment.user.profile.profileimg.url }}" class="rounded-circle me-2" width="20" height="20">
+          <a href="/profile/{{ comment.user.username }}" class="fw-bold text-decoration-none text">{{ comment.user.username }}:</a>
+      </span>
+      {{ comment.comment_text }}
+      <small class="text-footer d-block">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+  </div>
+  {% endfor %}
+{% else %}
+  <p class="text-footer mt-2">No comments yet.</p>
+{% endif %}
+
+        </div>
+
+        <small class="card-footer text-footer">
+          <i class="fa-solid fa-clock"></i> {{ post.created_at|date:"M d, Y H:i" }}
+        </small>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function sharePost(url) {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this post!',
+        text: 'Check out this post on our social media app.',
+        url: url
+      }).then(() => console.log('Post shared successfully!'))
+        .catch((error) => console.log('Error sharing', error));
+    } else {
+      navigator.clipboard.writeText(url)
+        .then(() => alert('Post URL copied to clipboard!'))
+        .catch(err => console.error('Failed to copy: ', err));
+    }
+  }
+</script>
+{% endblock %}

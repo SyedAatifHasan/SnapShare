@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+
+  <h4 class="mb-4 text-center">Create Photo Post</h4>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Multiple Image Upload -->
+    <div class="mb-3">
+      <label class="form-label fw-bold">Upload Photos</label>
+      <input
+        class="form-control"
+        type="file"
+        name="images"
+        multiple
+        accept="image/*"
+        required
+      >
+      <small class="text-muted">You can select multiple photos</small>
+    </div>
+
+    <!-- Caption -->
+    <div class="mb-3">
+      <label class="form-label fw-bold">Caption</label>
+      <textarea
+        class="form-control"
+        name="caption"
+        rows="3"
+        placeholder="Write something about your photos..."
+      ></textarea>
+    </div>
+
+    <!-- Allow Repost -->
+    <div class="form-check mb-3">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        name="allow_repost"
+        id="allowRepost"
+        checked
+      >
+      <label class="form-check-label" for="allowRepost">
+        Allow others to repost this post
+      </label>
+    </div>
+
+    <!-- Buttons -->
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'select_post_type' %}" class="btn btn-outline-secondary">
+        Cancel
+      </a>
+
+      <button type="submit" class="btn btn-primary">
+        Post
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

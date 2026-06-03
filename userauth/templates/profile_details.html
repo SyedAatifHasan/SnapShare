@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Profile Details</h3>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Profile Picture</label>
+                        <input type="file" name="image" class="form-control" id="profile-image">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Facebook</label>
+                        <input type="text" name="facebook" class="form-control" placeholder="Enter your Facebook URL"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Instagram</label>
+                        <input type="text" name="instagram" class="form-control" placeholder="Enter your Instagram URL"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">LinkedIn</label>
+                        <input type="text" name="linkedin" class="form-control" placeholder="Enter your LinkedIn URL"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">X</label>
+                        <input type="text" name="x" class="form-control" placeholder="Enter your X URL" required>
+                    </div>
+
+                    <p class="mt-3 text-center">
+                        <a href="{% url 'skip_profile' %}" class="outline-secondary mb-2">
+                            Skip for now
+                        </a>
+                    </p>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

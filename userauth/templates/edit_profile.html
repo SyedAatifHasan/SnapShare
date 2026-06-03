@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3 text-center">
+            <img src="{{ user_profile.profileimg.url }}" alt="Profile Image" class="img-thumbnail mb-2"
+                style="width:100px; height:100px; object-fit:cover;">
+            <label for="profile-image" class="col-form-label">Profile Photo</label>
+            <input type="file" name="image" class="form-control" id="profile-image">
+        </div>
+
+        <div class="mb-3">
+            <label for="bio-text" class="col-form-label">Bio</label>
+            <textarea class="form-control" name="bio" id="bio-text"
+                placeholder="Write something about yourself...">{{ user_profile.bio }}</textarea>
+        </div>
+        <div class="mb-3 position-relative">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" id="location" class="form-control"
+                placeholder="Enter your location(City)" autocomplete="off" value="{{ user_profile.location }}">
+            <div id="citySuggestions" class="list-group position-absolute w-100"
+                style="z-index: 2000; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+
+        <div class="mb-3">
+            <label class="col-form-label">Facebook</label>
+            <input type="text" class="form-control" name="fb" placeholder="Facebook URL" value="{{ user_profile.fb }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="col-form-label">Instagram</label>
+            <input type="text" class="form-control" name="insta" placeholder="Instagram URL"
+                value="{{ user_profile.insta }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="col-form-label">LinkedIn</label>
+            <input type="text" class="form-control" name="linkedin" placeholder="LinkedIn URL"
+                value="{{ user_profile.linkedin }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="col-form-label">X (Twitter)</label>
+            <input type="text" class="form-control" name="twitter" placeholder="Twitter URL"
+                value="{{ user_profile.twitter }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+    </form>
+</div>
+<script>
+  const cities = [
+    "Kathmandu", "Pokhara", "Bharatpur", "Lalitpur", "Birgunj", "Biratnagar",
+    "Ghorahi", "Dhangadi", "Itahari", "Janakpur", "Butwal", "Hetauda",
+    "Tulsipur", "Dharan", "Nepalgunj", "Kalaiya", "Jitpursimara",
+    "Budhanilkantha", "Birendranagar", "Sitganga", "Lalbandi", "Damak",
+    "Mechinagar", "Bhaktapur", "Dhulikhel", "Kirtipur", "Panauti",
+    "Banepa", "Madhyapur", "Inaruwa", "Dullu", "Birtamod", "Gulariya",
+    "Rajbiraj", "Lahan", "Tansen", "Baglung", "Lamahi", "Hile", "Bhadrapur",
+    "Taulihawa", "Gorkha", "Sankhuwasabha", "Bhimeshwor", "Jaleshwar",
+    "Ramechhap", "Manang", "Surkhet", "Chitwan"
+  ];
+
+  const locationInput = document.getElementById("location");
+  const citySuggestions = document.getElementById("citySuggestions");
+
+  locationInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    citySuggestions.innerHTML = "";
+    if (!query) return;
+
+    const matches = cities.filter(city => city.toLowerCase().startsWith(query));
+
+    matches.forEach(city => {
+      const div = document.createElement("div");
+      div.className = "list-group-item list-group-item-action";
+      div.textContent = city;
+
+      div.addEventListener("click", () => {
+        locationInput.value = city;
+        citySuggestions.innerHTML = "";
+      });
+      citySuggestions.appendChild(div);
+    });
+  });
+
+  document.addEventListener("click", function (e) {
+    if (e.target !== location && !citySuggestions.contains(e.target)) {
+      citySuggestions.innerHTML = "";
+    }
+  });
+</script>
+{% endblock %}

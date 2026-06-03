@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mt-4">
+  <div class="row">
+
+    <div class="col-12 col-md-8">
+
+      {% for pos in feed_items %}
+      <div class="card shadow-sm mb-4">
+
+        <div class="card-header d-flex align-items-center">
+          <img src="{{ pos.user.profile.profileimg.url }}" class="rounded-circle me-2" width="40" height="40">
+          <a href="/profile/{{ pos.user.username }}" class="fw-bold text-decoration-none text">
+            {{ pos.user.username }}
+          </a>
+
+          {% if pos.is_repost %}
+          <small class="ms-2 text-footer">
+            <i class="fa-solid fa-retweet"></i>
+            Reposted by <a href="/profile/{{ pos.reposted_by.username }}">@{{ pos.reposted_by.username }}</a>
+          </small>
+          {% endif %}
+        </div>
+
+        <div class="card-body">
+
+
+          <p class="text">{{ pos.caption }}</p>
+
+          {% with post_to_show=pos.repost_of|default:pos %}
+          {% if post_to_show.has_images %}
+          {% if post_to_show.active_images|length > 1 %}
+          <div id="carousel{{ pos.id }}" class="carousel slide mb-2" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              {% for img in post_to_show.active_images %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <img src="{{ img.image.url }}" class="d-block w-100 rounded">
+              </div>
+              {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ pos.id }}"
+              data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: #74b9ff;"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ pos.id }}"
+              data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: #74b9ff;"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+          {% else %}
+          <img src="{{ post_to_show.first_active_image.image.url }}" class="img-fluid rounded mb-2">
+          {% endif %}
+          {% endif %}
+
+
+          {% if post_to_show.video %}
+          <video class="w-100 rounded mb-2" autoplay loop controls>
+            <source src="{{ post_to_show.video.url }}">
+          </video>
+          {% endif %}
+
+          {% if post_to_show.text_content %}
+          <p>{{ post_to_show.text_content }}</p>
+          {% endif %}
+
+          {% endwith %}
+
+        </div>
+
+
+        <div class="d-flex gap-2 px-3 pb-2">
+          <a href="/like-post?post_id={{ pos.id }}"
+            class="btn btn-sm {% if pos.liked %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <i class="fa-solid fa-heart"></i> {{ pos.no_of_likes }}
+          </a>
+
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse"
+            data-bs-target="#comment{{ pos.id }}">
+            <i class="fa-solid fa-comment"></i> {{ pos.comment_count }}
+          </button>
+
+          {% if pos.allow_repost and not pos.repost_of %}
+          <a href="{% url 'repost' pos.id %}"
+            class="btn btn-sm {% if pos.reposted %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <i class="fa-solid fa-retweet"></i> {{ pos.no_of_reposts }}
+          </a>
+          {% endif %}
+
+          <button class="btn btn-sm btn-outline-primary"
+            onclick="sharePost('{{ request.build_absolute_uri }}/post/{{ pos.id }}')">
+            <i class="fa-solid fa-share"></i> Share
+          </button>
+        </div>
+        <div id="comment{{ pos.id }}" class="collapse px-3 pb-3">
+          <form method="POST" action="{% url 'add-comment' %}">
+            {% csrf_token %}
+            <input type="hidden" name="post_id" value="{{ pos.id }}">
+            <input type="text" name="comment" class="form-control form-control-sm mb-2" placeholder="Write a comment..."
+              required>
+            <button class="btn btn-sm btn-primary">Post</button>
+          </form>
+
+          {% for comment in comments %}
+          {% if comment.post_id == pos.id %}
+          <div class="mt-2 p-2 post-card rounded">
+            <span style="font-weight:bold">
+              <img src="{{ comment.user.profile.profileimg.url }}" class="rounded-circle me-2" width="20" height="20">
+              <a href="/profile/{{ comment.user.username }}" class="fw-bold text-decoration-none text">{{
+                comment.user.username }}</a>
+            </span>: {{ comment.comment_text }}
+            <small class="text-footer d-block">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+
+        <div class="card-footer text-footer small">
+          <i class="fa-solid fa-clock"></i> {{ pos.created_at|date:"M d, Y H:i" }}
+        </div>
+
+      </div>
+      {% empty %}
+      <div class="text-center">
+        <h4>Welcome {{ user.username }} 👋</h4>
+        <p>No posts yet. <a href="/create_post/">Create one</a></p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header"><strong>Suggested Users</strong></div>
+        <div class="card-body">
+          {% for user in suggested_users %}
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center">
+              <img src="{{ user.profile.profileimg.url }}" class="rounded-circle me-2" width="40" height="40">
+              <div>
+                <a href="/profile/{{ user.username }}" class="fw-bold text-decoration-none text">{{ user.username }}</a>
+                <small class="text-footer d-block"><i class="fa-solid fa-location-dot"></i> {{ user.profile.location   }}</small>
+              </div>
+            </div>
+            {% if request.user.username != user.username %}
+            <form method="POST" action="/follow/">
+              {% csrf_token %}
+              <input type="hidden" name="follower" value="{{ request.user.username }}">
+              <input type="hidden" name="user" value="{{ user.username }}">
+              <button
+                class="btn btn-sm {% if user.follow_status == 'follow' %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ user.follow_status }}</button>
+            </form>
+            {% else %}
+            <button class="btn btn-sm btn-secondary" disabled>It's You</button>
+            {% endif %}
+          </div>
+          {% empty %}
+          <p class="text-footer">No suggestions</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function sharePost(url) {
+    if (navigator.share) {
+      navigator.share({ title: 'Check out this post!', text: '', url: url })
+        .then(() => console.log('Post shared!'))
+        .catch(err => console.log(err));
+    } else {
+      navigator.clipboard.writeText(url)
+        .then(() => alert('Post URL copied!'))
+        .catch(err => console.log(err));
+    }
+  }
+</script>
+{% endblock %}

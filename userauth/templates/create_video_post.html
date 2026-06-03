@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h4>Create Video Post</h4>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <input type="file" name="video" class="form-control"
+                   accept="video/*" required>
+        </div>
+
+        <div class="mb-3">
+            <textarea name="caption" class="form-control" rows="3"
+                      placeholder="Write something..."></textarea>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" name="allow_repost" checked>
+            <label class="form-check-label">Allow repost</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Post</button>
+    </form>
+</div>
+{% endblock %}

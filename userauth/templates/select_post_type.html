@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <h3 class="mb-4">What do you want to post?</h3>
+
+    <a href="{% url 'create_text_post' %}" class="btn btn-outline-primary m-2">
+        Text Status
+    </a>
+
+    <a href="{% url 'create_image_post' %}" class="btn btn-outline-primary m-2">
+        Photos
+    </a>
+
+    <a href="{% url 'create_video_post' %}" class="btn btn-outline-primary m-2">
+        Video
+    </a>
+</div>
+{% endblock %}

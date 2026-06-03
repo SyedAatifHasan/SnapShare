@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Update Post</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="caption" class="form-label">Caption</label>
+                            <textarea name="caption" id="caption" class="form-control" rows="3">{{ post.caption }}</textarea>
+                        </div>
+
+                       
+                        {% if post.post_type|lower == 'text' %}
+                        <div class="mb-3">
+                            <label for="text_content" class="form-label">Text Content</label>
+                            <textarea name="text_content" id="text_content" class="form-control" rows="5">{{ post.text_content }}</textarea>
+                        </div>
+                        {% endif %}
+
+                        {% if post.post_type|lower == 'image' %}
+                            {% if post.image %}
+                            <div class="mb-3">
+                                <label class="form-label">Current Image <small>(Check to hide)</small></label>
+                                <div style="max-width: 250px; position: relative;">
+                                    <img src="{{ post.image.url }}" class="img-fluid rounded mb-2">
+                                    <input type="checkbox" name="hide_current_image" style="position:absolute; top:5px; right:5px;">
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label for="new_image" class="form-label">Replace / Add Main Image</label>
+                                <input type="file" name="new_image" id="new_image" class="form-control" accept="image/*">
+                            </div>
+
+                            {% if post.images.all %}
+                            <div class="mb-3">
+                                <label class="form-label">Additional Images</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for img in post.images.all %}
+                                        {% if img.is_active %}
+                                        <div style="position: relative; max-width: 150px;">
+                                            <img src="{{ img.image.url }}" class="img-fluid rounded" style="max-height:150px;">
+                                            <input type="checkbox" name="hide_images" value="{{ img.id }}" style="position:absolute; top:5px; right:5px;">
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="new_images" class="form-label">Add New Images</label>
+                                <input type="file" name="new_images" id="new_images" class="form-control" multiple accept="image/*">
+                            </div>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if post.post_type|lower == 'video' %}
+                            {% if post.video %}
+                            <div class="mb-3">
+                                <label class="form-label">Current Video <small>(Check to hide)</small></label>
+                                <video src="{{ post.video.url }}" controls class="w-100 mb-2"></video>
+                                <input type="checkbox" name="hide_video">
+                            </div>
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="new_video" class="form-label">Replace / Add Video</label>
+                                <input type="file" name="new_video" id="new_video" class="form-control" accept="video/*">
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="/profile/{{ request.user.username }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Post</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

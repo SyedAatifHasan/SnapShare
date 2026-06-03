@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h4>Create Text Status</h4>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <textarea name="text_content" class="form-control" rows="4"
+                      placeholder="What's on your mind?" required></textarea>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" name="allow_repost" checked>
+            <label class="form-check-label">Allow repost</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Post</button>
+    </form>
+</div>
+{% endblock %}

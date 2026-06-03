@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="mb-3">Your Notifications</h3>
+
+    {% if notifications %}
+    <div class="list-group">
+        {% for notif in notifications %}
+        <div class="d-flex align-items-center mb-3">
+
+            {% if notif.sender %}
+            <a href="/profile/{{ notif.sender.username }}"
+                style="display:flex; align-items:center; text-decoration:none; color:#fff;">
+                <img src="{{ notif.sender.profile.profileimg.url }}" alt="profile" class="rounded-circle me-2"
+                    style="width:45px;height:45px;">
+
+                <div>
+                    <span class="fw-bold text">
+                        {{ notif.sender.username }}:
+                    </span>
+            </a>
+
+
+            {% if notif.link %}
+            <a href="{{ notif.link }}" class="text-decoration-none text">
+                 {{ notif.message }}
+            </a>
+            {% else %}
+            : {{ notif.message }}
+            {% endif %}
+
+            <div>
+                <small class="text-footer">
+                    {{ notif.created_at|timesince }} ago
+                </small>
+            </div>
+        </div>
+
+        {% else %}
+        <div>
+            {{ notif.message }}
+            <div>
+                <small class="text-footer">
+                    {{ notif.created_at|timesince }} ago
+                </small>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-footer">No notifications yet.</p>
+{% endif %}
+</div>
+
+{% endblock %}

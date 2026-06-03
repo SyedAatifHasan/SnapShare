@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body" style="overflow: visible;">
+        <h3 class="text-center mb-4">Register</h3>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Choose a username" pattern="[a-z0-9_]+"
+              title="Lowercase only, no spaces" required>
+          </div>
+          <div class="mb-3 position-relative">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" id="location" class="form-control"
+              placeholder="Enter your location(City)" autocomplete="off">
+            <div id="citySuggestions" class="list-group position-absolute w-100"
+              style="z-index: 2000; max-height: 200px; overflow-y: auto;"></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password" id="show" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Register</button>
+            <label class="toggle-switch">
+              <input type="checkbox" onclick="myFunction()">
+              <span class="slider"></span>
+              <span class="toggle-text">Show Password</span>
+            </label>
+
+            <script>
+              function myFunction() {
+                var x = document.getElementById("show");
+                if (x.type === "password") {
+                  x.type = "text";
+                } else {
+                  x.type = "password";
+                }
+              } 
+            </script>
+          </div>
+        </form>
+        <p class="mt-3 text-center">
+          Already have an account? <a href="/login/">Login here</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const cities = [
+    "Kathmandu", "Pokhara", "Bharatpur", "Lalitpur", "Birgunj", "Biratnagar",
+    "Ghorahi", "Dhangadi", "Itahari", "Janakpur", "Butwal", "Hetauda",
+    "Tulsipur", "Dharan", "Nepalgunj", "Kalaiya", "Jitpursimara",
+    "Budhanilkantha", "Birendranagar", "Sitganga", "Lalbandi", "Damak",
+    "Mechinagar", "Bhaktapur", "Dhulikhel", "Kirtipur", "Panauti",
+    "Banepa", "Madhyapur", "Inaruwa", "Dullu", "Birtamod", "Gulariya",
+    "Rajbiraj", "Lahan", "Tansen", "Baglung", "Lamahi", "Hile", "Bhadrapur",
+    "Taulihawa", "Gorkha", "Sankhuwasabha", "Bhimeshwor", "Jaleshwar",
+    "Ramechhap", "Manang", "Surkhet", "Chitwan"
+  ];
+
+  const locationInput = document.getElementById("location");
+  const citySuggestions = document.getElementById("citySuggestions");
+
+  locationInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    citySuggestions.innerHTML = "";
+    if (!query) return;
+
+    const matches = cities.filter(city => city.toLowerCase().startsWith(query));
+
+    matches.forEach(city => {
+      const div = document.createElement("div");
+      div.className = "list-group-item list-group-item-action";
+      div.textContent = city;
+
+      div.addEventListener("click", () => {
+        locationInput.value = city;
+        citySuggestions.innerHTML = "";
+      });
+      citySuggestions.appendChild(div);
+    });
+  });
+
+  document.addEventListener("click", function (e) {
+    if (e.target !== location && !citySuggestions.contains(e.target)) {
+      citySuggestions.innerHTML = "";
+    }
+  });
+</script>
+{% endblock %}
